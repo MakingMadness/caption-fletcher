@@ -11,7 +11,7 @@ You can load a folder of images, and all captions stored in .txt files will be l
 ### Linux
 
 ```
-git clone git@github.com:MakingMadness/caption-fletcher.git
+git clone https://github.com/MakingMadness/caption-fletcher.git
 cd caption-fletcher
 python -m venv venv
 source venv/bin/activate
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ### Windows
 
 ```
-git clone git@github.com:MakingMadness/caption-fletcher.git
+git clone https://github.com/MakingMadness/caption-fletcher.git
 cd caption-fletcher
 python -m venv venv
 

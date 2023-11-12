@@ -143,7 +143,6 @@ class ImageCaptionEditor(QMainWindow):
             self.progress_bar.setValue(1)
             self.progress_bar.textVisible = True
 
-
     def load_captions(self, folder):
         self.progress_bar.setMaximum(len(self.image_files))
         self.progress_bar.setFormat("Auto captioning images with BLIP: %p%")
@@ -198,6 +197,7 @@ class ImageCaptionEditor(QMainWindow):
             caption_file_name = file_name.rsplit(".", 1)[0] + ".txt"
             with open(caption_file_name, "w") as f:
                 f.write(self.captions[file_name])
+
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
