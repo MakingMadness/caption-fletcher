@@ -130,11 +130,14 @@ class ImageCaptionEditor(QMainWindow):
             self.prev_button.setDisabled(False)
             self.next_button.setDisabled(False)
             self.save_button.setDisabled(False)
-            self.progress_bar.setDisabled(True)
+            self.progress_bar.setFormat("Manual captioning: %v/%m")
+            self.progress_bar.setValue(1)
+            self.progress_bar.textVisible = True
 
 
     def load_captions(self, folder):
         self.progress_bar.setMaximum(len(self.image_files))
+        self.progress_bar.setFormat("Auto captioning images with BLIP: %p%")
         for i, file_name in enumerate(self.image_files):
             caption_file_name = file_name.rsplit(".", 1)[0] + ".txt"
             if os.path.exists(caption_file_name):
@@ -171,12 +174,14 @@ class ImageCaptionEditor(QMainWindow):
             self.update_current_caption()
             self.current_image_index += 1
             self.display_image_and_caption()
+            self.progress_bar.setValue(self.current_image_index + 1)
 
     def prev_image(self):
         if self.current_image_index > 0:
             self.update_current_caption()
             self.current_image_index -= 1
             self.display_image_and_caption()
+            self.progress_bar.setValue(self.current_image_index + 1)
 
     def save_all_captions(self):
         self.update_current_caption()
