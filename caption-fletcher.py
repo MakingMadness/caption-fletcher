@@ -112,6 +112,15 @@ class ImageCaptionEditor(QMainWindow):
         self.next_button.setShortcut(QKeySequence("PgDown"))
         self.prev_button.setShortcut(QKeySequence("PgUp"))
         self.save_button.setShortcut("Ctrl+S")
+    
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F11:
+            if self.isFullScreen():
+                self.showNormal()
+            else:
+                self.showFullScreen()
+        else:
+            super().keyPressEvent(event)
 
     def create_caption(self, raw_image):
         image = self.vis_processors["eval"](raw_image).unsqueeze(0).to(device)
