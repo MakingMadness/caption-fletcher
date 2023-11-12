@@ -4,7 +4,7 @@ from PIL import Image
 import sys
 import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QTextEdit, QProgressBar
-from PyQt5.QtGui import QPixmap, QKeySequence
+from PyQt5.QtGui import QPixmap, QKeySequence, QResizeEvent
 from PyQt5.QtCore import Qt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,7 +25,6 @@ class ImageCaptionEditor(QMainWindow):
         # Image display
         self.image_label = QLabel(self)
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setMinimumSize(800, 600)  # Minimum size for image display
         main_layout.addWidget(self.image_label)
 
         # Caption box
@@ -117,6 +116,14 @@ class ImageCaptionEditor(QMainWindow):
     def update_current_caption(self):
         current_file = self.image_files[self.current_image_index]
         self.captions[current_file] = self.caption_box.toPlainText()
+
+    def resizeEvent(self, a0: QResizeEvent | None) -> None:
+        output = super().resizeEvent(a0)
+        if len(self.image_files):
+            file_name = self.image_files[self.current_image_index]
+            pixmap = QPixmap(file_name)
+            self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
+        return output
 
     def display_image_and_caption(self):
         if self.current_image_index < len(self.image_files):
