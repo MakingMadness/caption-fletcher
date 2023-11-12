@@ -32,7 +32,16 @@ pip install -r requirements.txt
 
 From within the caption-fletcher directory:
 
+### Linux
+
 ```
 source venv/bin/activate
+python caption-fletcher.py
+```
+
+### Windows
+
+```
+venv\Scripts\activate.bat
 python caption-fletcher.py
 ```
