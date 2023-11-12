@@ -2,7 +2,7 @@
 
 A simple app to create and edit captions for images, intended for use with machine learning (e.g. training Stable Diffusion LoRAs).
 
-![alt text](https://github.com/MakingMadness/caption-fletcher/blob/main/image.jpg?raw=true)
+![Caption Fletcher Screenshot](https://github.com/MakingMadness/caption-fletcher/blob/main/images/screenshot.png?raw=true)
 
 ## Installation
 
