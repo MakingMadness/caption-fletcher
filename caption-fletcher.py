@@ -16,7 +16,7 @@ class ImageCaptionEditor(QMainWindow):
         self.model, self.vis_processors, _ = load_model_and_preprocess(name="blip_caption", model_type="base_coco", is_eval=True, device=device)
 
         # Window setup
-        self.setWindowTitle("Image Caption Editor")
+        self.setWindowTitle("Caption Fletcher")
         self.setGeometry(100, 100, 1000, 800)  # Adjusted window size
 
         # Main Layout
