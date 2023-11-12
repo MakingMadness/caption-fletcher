@@ -46,17 +46,17 @@ class ImageCaptionEditor(QMainWindow):
         button_layout.addWidget(self.load_folder_button)
 
         # Previous Button
-        self.prev_button = QPushButton("Previous Image", self)
+        self.prev_button = QPushButton("Previous Image <PgUp>", self)
         self.prev_button.clicked.connect(self.prev_image)
         button_layout.addWidget(self.prev_button)
 
         # Next Button
-        self.next_button = QPushButton("Next Image", self)
+        self.next_button = QPushButton("Next Image <PgDn>", self)
         self.next_button.clicked.connect(self.next_image)
         button_layout.addWidget(self.next_button)
 
         # Save Button
-        self.save_button = QPushButton("Save All Captions", self)
+        self.save_button = QPushButton("Save All Captions <Ctrl+S>", self)
         self.save_button.clicked.connect(self.save_all_captions)
         button_layout.addWidget(self.save_button)
 
@@ -72,9 +72,16 @@ class ImageCaptionEditor(QMainWindow):
         self.captions = {}
         self.current_image_index = 0
 
+        # Disable caption box and buttons
+        self.caption_box.setDisabled(True)
+        self.prev_button.setDisabled(True)
+        self.next_button.setDisabled(True)
+        self.save_button.setDisabled(True)
+
         # Keyboard Shortcuts
         self.next_button.setShortcut(QKeySequence("PgDown"))
         self.prev_button.setShortcut(QKeySequence("PgUp"))
+        self.save_button.setShortcut("Ctrl+S")
 
     def create_caption(self, raw_image):
         image = self.vis_processors["eval"](raw_image).unsqueeze(0).to(device)
@@ -84,10 +91,14 @@ class ImageCaptionEditor(QMainWindow):
     def load_folder(self):
         folder = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         if folder:
-            self.image_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
+            self.image_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
             self.load_captions(folder)
             self.current_image_index = 0
             self.display_image_and_caption()
+            self.caption_box.setDisabled(False)
+            self.prev_button.setDisabled(False)
+            self.next_button.setDisabled(False)
+            self.save_button.setDisabled(False)
 
     def load_captions(self, folder):
         self.progress_bar.setMaximum(len(self.image_files))
