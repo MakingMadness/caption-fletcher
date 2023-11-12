@@ -12,5 +12,13 @@ cd caption-fletcher
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+## Usage
+
+From within the caption-fletcher directory:
+
+```
+source venv/bin/activate
 python caption-fletcher.py
 ```
