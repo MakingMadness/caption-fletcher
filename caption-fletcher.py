@@ -106,6 +106,7 @@ class ImageCaptionEditor(QMainWindow):
         self.prev_button.setDisabled(True)
         self.next_button.setDisabled(True)
         self.save_button.setDisabled(True)
+        self.progress_bar.setDisabled(True)
 
         # Keyboard Shortcuts
         self.next_button.setShortcut(QKeySequence("PgDown"))
@@ -120,6 +121,7 @@ class ImageCaptionEditor(QMainWindow):
     def load_folder(self):
         folder = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         if folder:
+            self.progress_bar.setDisabled(False)
             self.image_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
             self.load_captions(folder)
             self.current_image_index = 0
@@ -128,6 +130,8 @@ class ImageCaptionEditor(QMainWindow):
             self.prev_button.setDisabled(False)
             self.next_button.setDisabled(False)
             self.save_button.setDisabled(False)
+            self.progress_bar.setDisabled(True)
+
 
     def load_captions(self, folder):
         self.progress_bar.setMaximum(len(self.image_files))
