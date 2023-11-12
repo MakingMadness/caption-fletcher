@@ -3,11 +3,11 @@ from lavis.models import load_model_and_preprocess
 from PIL import Image
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QTextEdit, QProgressBar
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QTextEdit, QProgressBar, QSizePolicy
 from PyQt5.QtGui import QPixmap, QKeySequence, QResizeEvent
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon, QFont
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ImageCaptionEditor(QMainWindow):
     def __init__(self):
@@ -17,10 +17,41 @@ class ImageCaptionEditor(QMainWindow):
 
         # Window setup
         self.setWindowTitle("Caption Fletcher")
-        self.setGeometry(100, 100, 1000, 800)  # Adjusted window size
+        self.setGeometry(100, 100, 1000, 800)
+        self.setWindowIcon(QIcon('images/logo.png'))
 
         # Main Layout
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        header_layout = QHBoxLayout()
+
+        header_widget = QWidget()
+        header_widget.setLayout(header_layout)
+        header_widget.setMaximumHeight(100)
+
+        self.logo_label = QLabel(self)
+        logo_pixmap = QPixmap('images/logo.png')
+        self.logo_label.setPixmap(logo_pixmap.scaledToWidth(80, Qt.SmoothTransformation))
+        self.logo_label.margin = 0
+        header_layout.addWidget(self.logo_label)
+        
+        self.text_label = QLabel("Caption Fletcher", self)
+        font = QFont()
+        font.setPointSize(18)
+        self.text_label.setFont(font)
+        self.text_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        header_layout.addWidget(self.text_label)
+
+        main_layout.addWidget(header_widget)
+        main_layout.addLayout(header_layout)
+        
+        # Container
+        container = QWidget()
+        container.setLayout(main_layout)
+        container.setContentsMargins(10, 10, 10, 10)
+        self.setCentralWidget(container)
 
         # Image display
         self.image_label = QLabel(self)
@@ -29,7 +60,7 @@ class ImageCaptionEditor(QMainWindow):
 
         # Caption box
         self.caption_box = QTextEdit(self)
-        self.caption_box.setMaximumHeight(100)  # Set maximum height for caption box
+        self.caption_box.setMaximumHeight(100)
         main_layout.addWidget(self.caption_box)
 
         # Progress bar
@@ -42,6 +73,8 @@ class ImageCaptionEditor(QMainWindow):
         # Load Folder Button
         self.load_folder_button = QPushButton("Load Folder", self)
         self.load_folder_button.clicked.connect(self.load_folder)
+        self.load_folder_button.setIcon(QIcon('images/logo.png'))
+        self.load_folder_button.setIconSize(QSize(24, 24))
         button_layout.addWidget(self.load_folder_button)
 
         # Previous Button
@@ -60,11 +93,8 @@ class ImageCaptionEditor(QMainWindow):
         button_layout.addWidget(self.save_button)
 
         main_layout.addLayout(button_layout)
-
-        # Container
-        container = QWidget()
-        container.setLayout(main_layout)
-        self.setCentralWidget(container)
+        
+        main_layout.addWidget(container)
 
         # Data
         self.image_files = []
@@ -152,6 +182,7 @@ class ImageCaptionEditor(QMainWindow):
                 f.write(self.captions[file_name])
 
 if __name__ == "__main__":
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     app = QApplication(sys.argv)
     mainWin = ImageCaptionEditor()
     mainWin.show()
