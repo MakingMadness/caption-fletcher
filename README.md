@@ -24,7 +24,7 @@ pip install -r requirements.txt
 git clone https://github.com/MakingMadness/caption-fletcher.git
 cd caption-fletcher
 python -m venv venv
-
+venv\Scripts\activate.bat
 pip install -r requirements.txt
 ```
 
