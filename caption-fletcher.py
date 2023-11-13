@@ -153,8 +153,6 @@ class ImageCaptionEditor(QMainWindow):
                     caption = f.read()
             else:
                 caption = self.create_caption(Image.open(file_name).convert("RGB"))
-                with open(caption_file_name, "w") as f:
-                    f.write(caption)
             self.captions[file_name] = caption
             self.progress_bar.setValue(i + 1)
 
