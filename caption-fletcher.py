@@ -7,13 +7,15 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBo
 from PyQt5.QtGui import QPixmap, QKeySequence, QResizeEvent
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon, QFont
+import send2trash
 
 
 class ImageCaptionEditor(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.model, self.vis_processors, _ = load_model_and_preprocess(name="blip_caption", model_type="base_coco", is_eval=True, device=device)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model, self.vis_processors, _ = load_model_and_preprocess(name="blip_caption", model_type="base_coco", is_eval=True, device=self.device)
 
         # Window setup
         self.setWindowTitle("Caption Fletcher")
@@ -88,9 +90,14 @@ class ImageCaptionEditor(QMainWindow):
         button_layout.addWidget(self.next_button)
 
         # Save Button
-        self.save_button = QPushButton("Save All Captions <Ctrl+S>", self)
+        self.save_button = QPushButton("Save All <Ctrl+S>", self)
         self.save_button.clicked.connect(self.save_all_captions)
         button_layout.addWidget(self.save_button)
+
+        # Delete Button
+        self.delete_button = QPushButton("Delete Image <Del>", self)
+        self.delete_button.clicked.connect(self.delete_image)
+        button_layout.addWidget(self.delete_button)
 
         main_layout.addLayout(button_layout)
         
@@ -107,11 +114,13 @@ class ImageCaptionEditor(QMainWindow):
         self.next_button.setDisabled(True)
         self.save_button.setDisabled(True)
         self.progress_bar.setDisabled(True)
+        self.delete_button.setDisabled(True)
 
         # Keyboard Shortcuts
         self.next_button.setShortcut(QKeySequence("PgDown"))
         self.prev_button.setShortcut(QKeySequence("PgUp"))
         self.save_button.setShortcut("Ctrl+S")
+        self.delete_button.setShortcut("Delete")
     
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_F11:
@@ -123,7 +132,7 @@ class ImageCaptionEditor(QMainWindow):
             super().keyPressEvent(event)
 
     def create_caption(self, raw_image):
-        image = self.vis_processors["eval"](raw_image).unsqueeze(0).to(device)
+        image = self.vis_processors["eval"](raw_image).unsqueeze(0).to(self.device)
         caption = self.model.generate({"image": image})
         return caption[0]
 
@@ -132,6 +141,7 @@ class ImageCaptionEditor(QMainWindow):
         if folder:
             self.progress_bar.setDisabled(False)
             self.image_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
+            self.image_files.sort()
             self.load_captions(folder)
             self.current_image_index = 0
             self.display_image_and_caption()
@@ -139,6 +149,7 @@ class ImageCaptionEditor(QMainWindow):
             self.prev_button.setDisabled(False)
             self.next_button.setDisabled(False)
             self.save_button.setDisabled(False)
+            self.delete_button.setDisabled(False)
             self.progress_bar.setFormat("Manual captioning: %v/%m")
             self.progress_bar.setValue(1)
             self.progress_bar.textVisible = True
@@ -196,9 +207,24 @@ class ImageCaptionEditor(QMainWindow):
             with open(caption_file_name, "w") as f:
                 f.write(self.captions[file_name])
 
+    def delete_image(self):
+        self.update_current_caption()
+        current_file = self.image_files[self.current_image_index]
+        try:
+            send2trash.send2trash(current_file)
+            send2trash.send2trash(current_file.rsplit(".", 1)[0] + ".txt")
+        except OSError:
+            pass
+        self.image_files.pop(self.current_image_index)
+        self.captions.pop(current_file)
+        self.progress_bar.setMaximum(len(self.image_files))
+        self.progress_bar.setValue(self.current_image_index + 1)
+        if self.current_image_index >= len(self.image_files):
+            self.current_image_index = len(self.image_files) - 1
+        self.display_image_and_caption()
+
 
 if __name__ == "__main__":
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     app = QApplication(sys.argv)
     mainWin = ImageCaptionEditor()
     mainWin.show()
