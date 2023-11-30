@@ -66,6 +66,19 @@ class ImageCaptionEditor(QMainWindow):
         self.text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         header_layout.addWidget(self.text_label)
 
+        # Help Text
+        self.help_text_label = QLabel("Ctrl+C to copy image\nCtrl+V to overwrite image\nDel sends image to trash", self)
+        self.help_text_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
+        self.help_text_label.setFixedWidth(200)
+        font = QFont()
+        font.setPointSize(6)
+        palette = self.help_text_label.palette()
+        palette.setColor(self.help_text_label.foregroundRole(), Qt.gray)
+        self.help_text_label.setPalette(palette)
+        self.help_text_label.setFont(font)
+        self.help_text_label.setWordWrap(True)
+        header_layout.addWidget(self.help_text_label, 1)
+
         main_layout.addWidget(header_widget)
         main_layout.addLayout(header_layout)
         
@@ -100,24 +113,22 @@ class ImageCaptionEditor(QMainWindow):
         button_layout.addWidget(self.load_folder_button)
 
         # Previous Button
-        self.prev_button = QPushButton("Previous <PgUp>", self)
+        self.prev_button = QPushButton(self)
+        self.style_button_with_label(self.prev_button, "Previous", "PgUp")
         self.prev_button.clicked.connect(self.prev_image)
         button_layout.addWidget(self.prev_button)
 
         # Next Button
-        self.next_button = QPushButton("Next <PgDn>", self)
+        self.next_button = QPushButton(self)
+        self.style_button_with_label(self.next_button, "Next", "PgDn")
         self.next_button.clicked.connect(self.next_image)
         button_layout.addWidget(self.next_button)
 
         # Save Button
-        self.save_button = QPushButton("Save All <Ctrl+S>", self)
+        self.save_button = QPushButton(self)
+        self.style_button_with_label(self.save_button, "Save All", "Ctrl+S")
         self.save_button.clicked.connect(self.save_all_captions)
         button_layout.addWidget(self.save_button)
-
-        # Delete Button
-        self.delete_button = QPushButton("Delete <Del>", self)
-        self.delete_button.clicked.connect(self.delete_image)
-        button_layout.addWidget(self.delete_button)
 
         main_layout.addLayout(button_layout)
         
@@ -134,14 +145,24 @@ class ImageCaptionEditor(QMainWindow):
         self.next_button.setDisabled(True)
         self.save_button.setDisabled(True)
         self.progress_bar.setDisabled(True)
-        self.delete_button.setDisabled(True)
 
         # Keyboard Shortcuts
         self.next_button.setShortcut(QKeySequence("PgDown"))
         self.prev_button.setShortcut(QKeySequence("PgUp"))
         self.save_button.setShortcut("Ctrl+S")
-        self.delete_button.setShortcut("Delete")
-    
+
+    def style_button_with_label(self, button, main_text, shortcut_text=None):
+        button_layout = QHBoxLayout(button)
+        button_layout.setContentsMargins(5, 0, 5, 0)  # Adjust padding as needed
+        button_layout.setAlignment(Qt.AlignCenter)  # Align content to the left
+
+        if shortcut_text:
+            text = f"{main_text} <span style='color:gray; font-size:4pt'> {shortcut_text}</span>"
+        else:
+            text = main_text
+        label = QLabel(text)
+        button_layout.addWidget(label)
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_F11:
             if self.isFullScreen():
@@ -152,6 +173,8 @@ class ImageCaptionEditor(QMainWindow):
             self.copy_image_to_clipboard()
         elif event.key() == Qt.Key_V and event.modifiers() == Qt.ControlModifier:
             self.paste_image_from_clipboard()
+        elif event.key() == Qt.Key_Delete:
+            self.delete_image()
         else:
             super().keyPressEvent(event)
 
@@ -173,7 +196,6 @@ class ImageCaptionEditor(QMainWindow):
             self.prev_button.setDisabled(False)
             self.next_button.setDisabled(False)
             self.save_button.setDisabled(False)
-            self.delete_button.setDisabled(False)
             self.progress_bar.setFormat("Manual captioning: %v/%m")
             self.progress_bar.setValue(1)
             self.progress_bar.textVisible = True
@@ -260,6 +282,8 @@ class ImageCaptionEditor(QMainWindow):
                     self.pasted_images[i].save(file_name)
 
     def delete_image(self):
+        if not len(self.image_files):
+            return
         self.update_current_caption()
         current_file = self.image_files[self.current_image_index]
         try:
