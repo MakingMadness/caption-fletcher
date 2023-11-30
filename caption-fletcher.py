@@ -10,6 +10,25 @@ from PyQt5.QtGui import QIcon, QFont
 import send2trash
 
 
+class CustomTextEdit(QTextEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.editor = parent  # Reference to the main window
+
+    def insertFromMimeData(self, source):
+        if source.hasImage():
+            self.editor.paste_image_from_clipboard()
+        else:
+            super().insertFromMimeData(source)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_C and event.modifiers() == Qt.ControlModifier:
+            if not self.textCursor().hasSelection():
+                self.editor.copy_image_to_clipboard()
+                return
+        super().keyPressEvent(event)
+
+
 class ImageCaptionEditor(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -62,7 +81,7 @@ class ImageCaptionEditor(QMainWindow):
         main_layout.addWidget(self.image_label)
 
         # Caption box
-        self.caption_box = QTextEdit(self)
+        self.caption_box = CustomTextEdit(self)
         self.caption_box.setMaximumHeight(100)
         main_layout.addWidget(self.caption_box)
 
