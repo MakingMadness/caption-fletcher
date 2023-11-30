@@ -16,6 +16,7 @@ class ImageCaptionEditor(QMainWindow):
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model, self.vis_processors, _ = load_model_and_preprocess(name="blip_caption", model_type="base_coco", is_eval=True, device=self.device)
+        self.pasted_images = {}
 
         # Window setup
         self.setWindowTitle("Caption Fletcher")
@@ -80,12 +81,12 @@ class ImageCaptionEditor(QMainWindow):
         button_layout.addWidget(self.load_folder_button)
 
         # Previous Button
-        self.prev_button = QPushButton("Previous Image <PgUp>", self)
+        self.prev_button = QPushButton("Previous <PgUp>", self)
         self.prev_button.clicked.connect(self.prev_image)
         button_layout.addWidget(self.prev_button)
 
         # Next Button
-        self.next_button = QPushButton("Next Image <PgDn>", self)
+        self.next_button = QPushButton("Next <PgDn>", self)
         self.next_button.clicked.connect(self.next_image)
         button_layout.addWidget(self.next_button)
 
@@ -95,7 +96,7 @@ class ImageCaptionEditor(QMainWindow):
         button_layout.addWidget(self.save_button)
 
         # Delete Button
-        self.delete_button = QPushButton("Delete Image <Del>", self)
+        self.delete_button = QPushButton("Delete <Del>", self)
         self.delete_button.clicked.connect(self.delete_image)
         button_layout.addWidget(self.delete_button)
 
@@ -128,6 +129,10 @@ class ImageCaptionEditor(QMainWindow):
                 self.showNormal()
             else:
                 self.showFullScreen()
+        elif event.key() == Qt.Key_C and event.modifiers() == Qt.ControlModifier:
+            self.copy_image_to_clipboard()
+        elif event.key() == Qt.Key_V and event.modifiers() == Qt.ControlModifier:
+            self.paste_image_from_clipboard()
         else:
             super().keyPressEvent(event)
 
@@ -180,7 +185,13 @@ class ImageCaptionEditor(QMainWindow):
         return output
 
     def display_image_and_caption(self):
-        if self.current_image_index < len(self.image_files):
+        if self.current_image_index in self.pasted_images:
+            # Display pasted image if present
+            pixmap = self.pasted_images[self.current_image_index]
+            self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
+        elif self.current_image_index < len(self.image_files) and self.image_files[
+            self.current_image_index] is not None:
+            # Normal behavior for displaying images from file
             file_name = self.image_files[self.current_image_index]
             pixmap = QPixmap(file_name)
             self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
@@ -200,12 +211,34 @@ class ImageCaptionEditor(QMainWindow):
             self.display_image_and_caption()
             self.progress_bar.setValue(self.current_image_index + 1)
 
+    def copy_image_to_clipboard(self):
+        if self.current_image_index < len(self.image_files):
+            clipboard = QApplication.clipboard()
+            current_file = self.image_files[self.current_image_index]
+            image = QPixmap(current_file)
+            clipboard.setPixmap(image)
+
+    def paste_image_from_clipboard(self):
+        clipboard = QApplication.clipboard()
+        mimeData = clipboard.mimeData()
+
+        if mimeData.hasImage():
+            image = clipboard.image()
+            pixmap = QPixmap.fromImage(image)
+            self.pasted_images[self.current_image_index] = pixmap
+            self.display_image_and_caption()
+
     def save_all_captions(self):
         self.update_current_caption()
         for i, file_name in enumerate(self.image_files):
-            caption_file_name = file_name.rsplit(".", 1)[0] + ".txt"
-            with open(caption_file_name, "w") as f:
-                f.write(self.captions[file_name])
+            if file_name is not None:
+                caption_file_name = file_name.rsplit(".", 1)[0] + ".txt"
+                with open(caption_file_name, "w") as f:
+                    f.write(self.captions[file_name])
+
+                if i in self.pasted_images:
+                    # Save pasted image
+                    self.pasted_images[i].save(file_name)
 
     def delete_image(self):
         self.update_current_caption()
