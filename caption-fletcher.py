@@ -93,6 +93,18 @@ class ImageCaptionEditor(QMainWindow):
         self.image_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.image_label)
 
+        # Image Info Label
+        self.image_info_label = QLabel(self)
+        font = QFont()
+        font.setPointSize(6)
+        self.image_info_label.setFont(font)
+        self.image_info_label.setMaximumHeight(self.image_info_label.fontMetrics().height())  # Set max height to the height of one line of text
+        self.image_info_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        main_layout.addWidget(self.image_info_label)
+        palette = self.image_info_label.palette()
+        palette.setColor(self.image_info_label.foregroundRole(), Qt.gray)
+        self.image_info_label.setPalette(palette)
+
         # Caption box
         self.caption_box = CustomTextEdit(self)
         self.caption_box.setMaximumHeight(100)
@@ -243,6 +255,15 @@ class ImageCaptionEditor(QMainWindow):
             pixmap = QPixmap(file_name)
             self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
             self.caption_box.setText(self.captions[file_name])
+        # Update image info
+        if self.current_image_index < len(self.image_files):
+            file_name = self.image_files[self.current_image_index]
+            if os.path.isfile(file_name):
+                image = QPixmap(file_name)
+                file_size = os.path.getsize(file_name)
+                self.image_info_label.setText(f"{image.width()}x{image.height()} | {os.path.basename(file_name)} | {file_size / 1024:.2f} KB")
+            else:
+                self.image_info_label.clear()
 
     def next_image(self):
         if self.current_image_index + 1 < len(self.image_files):
