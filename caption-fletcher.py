@@ -238,32 +238,31 @@ class ImageCaptionEditor(QMainWindow):
         return output
 
     def display_image_and_caption(self):
-        if self.current_image_index in self.pasted_images:
-            # Display pasted image if present
-            pixmap = self.pasted_images[self.current_image_index]
-            self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
-            # Update the caption for the pasted image
-            file_name = self.image_files[self.current_image_index]
-            if file_name in self.captions:
-                self.caption_box.setText(self.captions[file_name])
-            else:
-                self.caption_box.clear()
-        elif self.current_image_index < len(self.image_files) and self.image_files[
-            self.current_image_index] is not None:
-            # Normal behavior for displaying images from file
-            file_name = self.image_files[self.current_image_index]
-            pixmap = QPixmap(file_name)
-            self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
-            self.caption_box.setText(self.captions[file_name])
-        # Update image info
+        file_name = "Unknown"
+        file_size_text = "??? KB"
+        pixmap = None
+
         if self.current_image_index < len(self.image_files):
             file_name = self.image_files[self.current_image_index]
-            if os.path.isfile(file_name):
-                image = QPixmap(file_name)
+            if self.current_image_index in self.pasted_images:
+                # Handle pasted image
+                pixmap = self.pasted_images[self.current_image_index]
+                self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
+            elif os.path.isfile(file_name):
+                # Handle image loaded from file
+                pixmap = QPixmap(file_name)
+                self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
                 file_size = os.path.getsize(file_name)
-                self.image_info_label.setText(f"{image.width()}x{image.height()} | {os.path.basename(file_name)} | {file_size / 1024:.2f} KB")
-            else:
-                self.image_info_label.clear()
+                file_size_text = f"{file_size / 1024:.2f} KB"
+
+        if pixmap:
+            resolution_text = f"{pixmap.width()}x{pixmap.height()}"
+        else:
+            resolution_text = "Unknown"
+
+        # Set label text with the available information
+        self.image_info_label.setText(
+            f"{resolution_text} | {os.path.basename(file_name)} | {file_size_text}")
 
     def next_image(self):
         if self.current_image_index + 1 < len(self.image_files):
