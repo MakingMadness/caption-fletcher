@@ -230,6 +230,12 @@ class ImageCaptionEditor(QMainWindow):
             # Display pasted image if present
             pixmap = self.pasted_images[self.current_image_index]
             self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio))
+            # Update the caption for the pasted image
+            file_name = self.image_files[self.current_image_index]
+            if file_name in self.captions:
+                self.caption_box.setText(self.captions[file_name])
+            else:
+                self.caption_box.clear()
         elif self.current_image_index < len(self.image_files) and self.image_files[
             self.current_image_index] is not None:
             # Normal behavior for displaying images from file
@@ -282,22 +288,21 @@ class ImageCaptionEditor(QMainWindow):
                     self.pasted_images[i].save(file_name)
 
     def delete_image(self):
-        if not len(self.image_files):
-            return
-        self.update_current_caption()
-        current_file = self.image_files[self.current_image_index]
-        try:
-            send2trash.send2trash(current_file)
-            send2trash.send2trash(current_file.rsplit(".", 1)[0] + ".txt")
-        except OSError:
-            pass
-        self.image_files.pop(self.current_image_index)
-        self.captions.pop(current_file)
-        self.progress_bar.setMaximum(len(self.image_files))
-        self.progress_bar.setValue(self.current_image_index + 1)
-        if self.current_image_index >= len(self.image_files):
-            self.current_image_index = len(self.image_files) - 1
-        self.display_image_and_caption()
+        if self.current_image_index < len(self.image_files):
+            self.update_current_caption()
+            current_file = self.image_files[self.current_image_index]
+            try:
+                send2trash.send2trash(current_file)
+                send2trash.send2trash(current_file.rsplit(".", 1)[0] + ".txt")
+            except OSError:
+                pass
+            self.image_files.pop(self.current_image_index)
+            self.captions.pop(current_file)
+            self.progress_bar.setMaximum(len(self.image_files))
+            self.progress_bar.setValue(self.current_image_index + 1)
+            if self.current_image_index >= len(self.image_files):
+                self.current_image_index = len(self.image_files) - 1
+            self.display_image_and_caption()
 
 
 if __name__ == "__main__":
