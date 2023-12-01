@@ -4,6 +4,13 @@ A simple app to create and edit captions for your image datasets, intended for u
 
 You can load a folder of images, and all captions stored in .txt files will be loaded too. If there's no caption for any of the images it uses BLIP to analyse them and automatically add the caption.
 
+## Features
+
+- Fast and simple to use
+- Missing captions automatically get added using BLIP
+- Need to edit an image? Copy & paste the image buffer directly!
+- Send an image and its caption to trash
+
 ![Caption Fletcher Screenshot](https://github.com/MakingMadness/caption-fletcher/blob/main/images/screenshot.png?raw=true)
 
 ## Installation
