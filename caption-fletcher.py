@@ -324,6 +324,7 @@ class ImageCaptionEditor(QMainWindow):
             except OSError:
                 pass
             self.image_files.pop(self.current_image_index)
+            self.pasted_images.pop(self.current_image_index, None)
             self.captions.pop(current_file)
             self.progress_bar.setMaximum(len(self.image_files))
             self.progress_bar.setValue(self.current_image_index + 1)
