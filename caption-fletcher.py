@@ -306,6 +306,8 @@ class ImageCaptionEditor(QMainWindow):
                 if i in self.pasted_images:
                     # Save pasted image
                     self.pasted_images[i].save(file_name)
+                    del self.pasted_images[i]
+        self.display_image_and_caption()
 
     def delete_image(self):
         if self.current_image_index < len(self.image_files):
