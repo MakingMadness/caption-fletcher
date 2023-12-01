@@ -200,6 +200,7 @@ class ImageCaptionEditor(QMainWindow):
         if folder:
             self.progress_bar.setDisabled(False)
             self.image_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
+            self.pasted_images = {}
             self.image_files.sort()
             self.load_captions(folder)
             self.current_image_index = 0
