@@ -256,6 +256,10 @@ class ImageCaptionEditor(QMainWindow):
                 file_size = os.path.getsize(file_name)
                 file_size_text = f"{file_size / 1024:.2f} KB"
 
+            # Set caption text
+            caption_text = self.captions.get(file_name, "")
+            self.caption_box.setText(caption_text)
+
         if pixmap:
             resolution_text = f"{pixmap.width()}x{pixmap.height()}"
         else:
